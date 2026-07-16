@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/repositories/scores_repository.dart';
 import '../data/services/auth_service.dart';
 import '../model/score.dart';
+import 'theme.dart';
 
 class ScoresScreen extends StatefulWidget {
   const ScoresScreen({super.key, required this.onLogout});
@@ -64,10 +65,14 @@ class _ScoresScreenState extends State<ScoresScreen> {
     // If scores list => dispaly the list using the ScoreTile
     if (scores != null) {
       if (scores!.isEmpty) {
-        return const Center(child: Text("No scores yet"));
+        return const Center(
+          child: Text("No scores yet", style: TextStyle(color: Colors.white)),
+        );
       }
-      return ListView.builder(
+      return ListView.separated(
+        padding: const EdgeInsets.only(top: 4),
         itemCount: scores!.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 16),
         itemBuilder: (context, index) => ScoreTile(score: scores![index]),
       );
     }
@@ -83,7 +88,7 @@ class _ScoresScreenState extends State<ScoresScreen> {
     }
 
     // otherwise, we disaply the  CircularProgressIndicator
-    return const Center(child: CircularProgressIndicator());
+    return const Center(child: CircularProgressIndicator(color: Colors.white));
   }
 
   String get welcomeLabel => "Welcome ${userName != null ? userName! : ""} !";
@@ -91,16 +96,45 @@ class _ScoresScreenState extends State<ScoresScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(welcomeLabel),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: onLogoutPressed,
+      backgroundColor: AppTheme.mainColor,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    welcomeLabel,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.exit_to_app, color: Colors.white),
+                    onPressed: onLogoutPressed,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                "Your scores",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Expanded(child: content),
+            ],
           ),
-        ],
+        ),
       ),
-      body: Padding(padding: const EdgeInsets.all(20.0), child: content),
     );
   }
 }
@@ -110,16 +144,36 @@ class ScoreTile extends StatelessWidget {
 
   final Score score;
 
+  Color get scoreColor {
+    if (score.value >= 70) return Colors.green;
+    if (score.value >= 40) return Colors.orange;
+    return Colors.red;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ListTile(
-        title: Text(score.title),
-        trailing: Text(
-          "${score.value}/100",
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            score.title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+          Text(
+            "${score.value.toString().padLeft(2, '0')}/100",
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: scoreColor,
+            ),
+          ),
+        ],
       ),
     );
   }
